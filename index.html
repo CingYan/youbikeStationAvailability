@@ -27,8 +27,11 @@
         <select v-model="city">
           <option v-for="city of options.cities" v-bind:value="city.code">{{ city.name }}</option>
         </select>
+		
       </div>
-      <div>
+     <p>感謝唯唯(@bestpika)大大幫我做這個網頁，聽他說他是隨便做ㄉ，大佬一隨便起來果然真不隨便。
+	 
+	  <div>
         <table class="table">
           <thead>
             <th>ID</th>
@@ -36,7 +39,8 @@
             <th>地圖</th>
             <th>營運</th>
             <th>可借/可還/總數</th>
-			<th>更新時間</th>
+			<th>UBIKEㄉ更新時間</th>
+			<th>真正ㄉ更新時間</th>
           </thead>
           <tbody>
             <tr v-for="station of stations">
@@ -45,6 +49,7 @@
               <td><a v-bind:href="`https://www.google.com/maps/search/?api=1&query=${station.StationPosition.PositionLat},${station.StationPosition.PositionLon}`">Google</a></td>
               <td>{{ station.service }}</td>
               <td>{{ station.rent[0] }}/{{ station.rent[1] }}/{{ station.BikesCapacity }}</td>
+			  <td>{{ station.SrcUpdateTime }}</td>
 			  <td>{{ station.UpdateTime}}</td>
             </tr>
           </tbody>
@@ -57,9 +62,18 @@
           el: '#app',
           data: {
             options: {
-              cities: [
-                { name: '新竹市', code: 'Hsinchu' }
-              ]
+				cities: [
+				{ name: '新竹市', code: 'Hsinchu' },
+				{ name: '苗栗縣', code: 'MiaoliCounty' },
+				{ name: '彰化縣', code: 'ChanghuaCounty' },
+				{ name: '新北市', code: 'NewTaipei' },
+				{ name: '屏東縣', code: 'PingtungCounty' },
+				{ name: '桃園市', code: 'Taoyuan' },
+				{ name: '臺北市', code: 'Taipei' },
+				{ name: '高雄市', code: 'Kaohsiung' },
+				{ name: '臺南市', code: 'Tainan' },
+				{ name: '臺中市', code: 'Taichung' }
+			  ]
             },
             city: '',
             stations: [],
@@ -82,7 +96,7 @@
               }
               this.stations = stations
               clearTimeout(this.refresh)
-              this.refresh = setTimeout(this.fetchBikes, 300000)
+              this.refresh = setTimeout(this.fetchBikes, 30000)
             }
           }
         })
@@ -91,3 +105,5 @@
   </body>
 
 </html>
+
+s
