@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <!--
 	ver2.3 API獲取由PTX改為公司內部API網址，並新增其他縣市區域(仍然不是我弄ㄉ)
-	Ver2.31 註解掉ㄌ站點ID、google地圖ㄉtd，反正我上班的時候也用不到 '將感謝詞移動至底下
+	Ver2.3.1 註解掉ㄌ站點ID、google地圖ㄉtd，反正我上班的時候也用不到 '將感謝詞移動至底下
+	Ver2.3.1.1 媽的靠北勒，感謝詞打錯標點符號。額順便把感謝詞ㄉ部分改為使用div包起乃
 	-->
 <html lang="zh-Hant">
   <head>
@@ -22,7 +23,6 @@
     <link rel="stylesheet" href="https://unpkg.com/bulma/css/bulma.min.css">
     <script src="https://unpkg.com/vue/dist/vue.min.js"></script>
   </head>
-
   <body>
     <div id="app">
       <div class="select" v-on:change="fetchBikes">
@@ -53,7 +53,8 @@
         </table>
       </div>
     </div>
-	  <p>Copyright © 總之不是我，是bestpika ，並感謝唯唯(@bestpika)大大幫我做這個網頁，聽他說他是隨便做ㄉ，大佬一隨便起來果然真不隨便。
+	<div id='thankandloveyoubestpika'>
+	Copyright © 總之不是我，是bestpika。並感謝唯唯(@bestpika)大大幫我做這個網頁，聽他說他是隨便做ㄉ，大佬一隨便起來果然真不隨便。</div>
     <script>
       (() => {
         new Vue({
@@ -87,5 +88,4 @@
       })()
     </script>
   </body>
-
 </html>
