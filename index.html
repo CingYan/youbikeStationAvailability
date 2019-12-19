@@ -26,11 +26,16 @@
   </head>
   <body>
     <div id="app">
-      <div class="select" v-on:change="fetchBikes">
-        <select v-model="city">
-          <option v-for="city of options.cities" v-bind:value="city.code">{{ city.name }}</option>
-        </select>
-      </div>
+      		<table>
+			<tr>
+				<td>
+				<div class="select" v-on:change="fetchBikes">
+				<select v-model="city">
+					<option v-for="city of options.cities" v-bind:value="city.code">{{ city.name }}</option>
+				</select></div></td>
+				<td><a href="allno.html">什ㄇ都有版</a></td>
+			</tr>
+		</table>
       <div>
         <table class="table">
           <thead>
