@@ -5,7 +5,8 @@
     Ver 2.3.1.1 媽的靠北勒，感謝詞打錯標點符號。額順便把感謝詞ㄉ部分改為使用div包起乃
     Ver 2.3.2 經過我十分鐘的大號，我決定也拔掉營運狀態，然後把三小都有ㄉ弄一ㄍ新的site。順便思考我是不是不應該把版控寫在source裡面。
     Ver 2.3.3 以下開始為index版本。新增css wordbreak，選項列版面更新，減少不必要選項，租借數據符號更改 
-    Ver 2.3.4 Fix苗栗無法顯示Bug-->
+    Ver 2.3.4 Fix苗栗無法顯示Bug
+    Ver 2.3.4.1 更改更新時間間隔-->
 <html lang="zh-Hant">
 <head>
 	<meta charset="utf-8">
@@ -76,7 +77,7 @@
 	         methods: {
 	           async fetchBikes() {
 	             clearTimeout(this.refresh)
-	             this.refresh = setTimeout(this.fetchBikes, 20000)
+	             this.refresh = setTimeout(this.fetchBikes, 10000)
 	             const data = await (await fetch(`https://apis.youbike.com.tw/api/front/station/all?lang=tw&type=1&_=${Date.now()}`)).json()
 	             this.stations = data.retVal.filter(station => station.area_code === this.city)
 	           }
