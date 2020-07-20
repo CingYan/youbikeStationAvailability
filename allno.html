@@ -5,6 +5,7 @@
     Ver 2.3.1.1 媽的靠北勒，感謝詞打錯標點符號。額順便把感謝詞ㄉ部分改為使用div包起乃
     Ver 2.3.2 經過我十分鐘的大號，我決定也拔掉營運狀態，然後把三小都有ㄉ弄一ㄍ新的site(對就是現在這個)。順便思考我是不是不應該把版控寫在source裡面。
     Ver 2.3.4 跟上index，苗栗顯示bug Fix
+    Ver 2.3.4.1 youbike更改更新data 更換name 以及更新時間間隔
     -->
 <html lang="zh-Hant">
 <head>
@@ -25,6 +26,16 @@
 	</style>
 	<link href="https://unpkg.com/bulma/css/bulma.min.css" rel="stylesheet">
 	<script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+	<script language="JavaScript">
+	function ShowTime(){
+　		var NowDate=new Date();
+　		var h=NowDate.getHours();
+　		var m=NowDate.getMinutes();
+　		var s=NowDate.getSeconds();　
+　		document.getElementById('showbox').innerHTML = h+'點'+m+'分'+s+'秒';
+　		setTimeout('ShowTime()',1000);
+	}
+	</script>
 </head>
 <body>
 	<div id="app">
@@ -33,9 +44,10 @@
 				<td>
 					<div class="select" v-on:change="fetchBikes"><select v-model="city"><option v-bind:value="city.code" v-for="city of options.cities">{{ city.name }}</option></select></div>
 				</td>
-				<td style="line-height:36px;"><a href="./index.html">&nbsp;&nbsp;新竹維調</a></td>
+				<td style="line-height:40px;"><a href="./index.html">&nbsp;&nbsp;新竹維調</a></td>
 			</tr>
 		</table>
+		<div style="text-align:center;" id="showbox"></div>
 		<div>
 			<table class="table">
 				<thead>
@@ -55,7 +67,7 @@
 						<td><a v-bind:href="`https://www.google.com/maps/search/?api=1&query=${station.lat},${station.lng}`">Google</a></td>
 						<td>{{ station.status === 1 }}</td>
 						<td>{{ station.available_spaces }}/{{ station.empty_spaces }}/{{ station.parking_spaces }}</td>
-						<td>{{ station.updated_at }}</td>
+						<td>{{ station.time }}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -88,7 +100,7 @@
 	         methods: {
 	           async fetchBikes() {
 	             clearTimeout(this.refresh)
-	             this.refresh = setTimeout(this.fetchBikes, 20000)
+	             this.refresh = setTimeout(this.fetchBikes, 5000)
 	             const data = await (await fetch(`https://apis.youbike.com.tw/api/front/station/all?lang=tw&type=1&_=${Date.now()}`)).json()
 	             this.stations = data.retVal.filter(station => station.area_code === this.city)
 	           }
