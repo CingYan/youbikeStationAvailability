@@ -89,7 +89,7 @@
 	         methods: {
 	           async fetchBikes() {
 	             clearTimeout(this.refresh)
-	             this.refresh = setTimeout(this.fetchBikes, 10000)
+	             this.refresh = setTimeout(this.fetchBikes, 5000)
 	             const data = await (await fetch(`https://apis.youbike.com.tw/api/front/station/all?lang=tw&type=1&_=${Date.now()}`)).json()
 	             this.stations = data.retVal.filter(station => station.area_code === this.city)
 	           }
