@@ -6,7 +6,8 @@
     Ver 2.3.2 經過我十分鐘的大號，我決定也拔掉營運狀態，然後把三小都有ㄉ弄一ㄍ新的site。順便思考我是不是不應該把版控寫在source裡面。
     Ver 2.3.3 以下開始為index版本。新增css wordbreak，選項列版面更新，減少不必要選項，租借數據符號更改 
     Ver 2.3.4 Fix苗栗無法顯示Bug
-    Ver 2.3.4.1 更改更新時間間隔-->
+    Ver 2.3.4.1 更改更新時間間隔
+    Ver 2.3.4.2 youbike更改更新data 更換name-->
 <html lang="zh-Hant">
 <head>
 	<meta charset="utf-8">
@@ -51,7 +52,7 @@
 					<tr v-for="station of stations">
 						<td>{{ station.name_tw }}</td>
 						<td>{{ station.available_spaces }}｜{{ station.empty_spaces }}｜{{ station.parking_spaces }}</td>
-						<td>{{ station.updated_at }}</td>
+						<td>{{ station.time }}</td>
 					</tr>
 				</tbody>
 			</table>
