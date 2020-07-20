@@ -7,7 +7,7 @@
     Ver 2.3.3 以下開始為index版本。新增css wordbreak，選項列版面更新，減少不必要選項，租借數據符號更改 
     Ver 2.3.4 Fix苗栗無法顯示Bug
     Ver 2.3.4.1 更改更新時間間隔
-    Ver 2.3.4.2 youbike更改更新data 更換name-->
+    Ver 2.3.4.2 youbike更改更新data 更換name 之後版本改為updata上傳編寫-->
 <html lang="zh-Hant">
 <head>
 	<meta charset="utf-8">
@@ -27,6 +27,16 @@
 	</style>
 	<link href="https://unpkg.com/bulma/css/bulma.min.css" rel="stylesheet">
 	<script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+		<script language="JavaScript">
+	function ShowTime(){
+　		var NowDate=new Date();
+　		var h=NowDate.getHours();
+　		var m=NowDate.getMinutes();
+　		var s=NowDate.getSeconds();　
+　		document.getElementById('showbox').innerHTML = h+'點'+m+'分'+s+'秒';
+　		setTimeout('ShowTime()',1000);
+	}
+	</script>
 </head>
 <body>
 	<div id="app">
@@ -36,9 +46,10 @@
 					<div class="select" v-on:change="fetchBikes"><select v-model="city">
 					<option v-bind:value="city.code" v-for="city of options.cities">{{ city.name }}</option></select></div>
 				</td>
-				<td style="line-height:36px;"><a href="allno.html">&nbsp;&nbsp;什ㄇ都有版</a></td><!--免der忘惹，前面控制高度達到視覺水平，再來是空格符號-->
+				<td style="line-height:40px;"><a href="allno.html">&nbsp;&nbsp;什ㄇ都有版</a></td><!--免der忘惹，前面控制高度達到視覺水平，再來是空格符號-->
 			</tr>
 		</table>
+		<div style="text-align:center;" id="showbox"></div>
 		<div>
 			<table class="table">
 				<thead>
