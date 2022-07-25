@@ -1,13 +1,4 @@
 <!DOCTYPE html>
-<!--
-    ver 2.3 API獲取由PTX改為公司內部API網址，並新增其他縣市區域(仍然不是我弄ㄉ)
-    Ver 2.3.1 註解掉ㄌ站點ID、google地圖ㄉtd，反正我上班的時候也用不到 '將感謝詞移動至底下
-    Ver 2.3.1.1 媽的靠北勒，感謝詞打錯標點符號。額順便把感謝詞ㄉ部分改為使用div包起乃
-    Ver 2.3.2 經過我十分鐘的大號，我決定也拔掉營運狀態，然後把三小都有ㄉ弄一ㄍ新的site。順便思考我是不是不應該把版控寫在source裡面。
-    Ver 2.3.3 以下開始為index版本。新增css wordbreak，選項列版面更新，減少不必要選項，租借數據符號更改 
-    Ver 2.3.4 Fix苗栗無法顯示Bug
-    Ver 2.3.4.1 更改更新時間間隔
-    Ver 2.3.4.2 youbike更改更新data 更換name 之後版本改為updata上傳編寫-->
 <html lang="zh-Hant">
 <head>
 	<meta charset="utf-8">
@@ -42,11 +33,9 @@
 	<div id="app">
 		<table align="center">
 			<tr>
-				<td>
-					<div class="select" v-on:change="fetchBikes"><select v-model="city">
-					<option v-bind:value="city.code" v-for="city of options.cities">{{ city.name }}</option></select></div>
-				</td>
-				<td style="line-height:40px;"><a href="allno.html">&nbsp;&nbsp;什ㄇ都有版</a></td><!--免der忘惹，前面控制高度達到視覺水平，再來是空格符號-->
+				<td><div class="select" v-on:change="fetchBikes"><select v-model="city"><option v-bind:value="city.code" v-for="city of options.cities">{{ city.name }}</option></select></div></td>
+				<td style="line-height:40px;"><a href="2point0allno.html">&nbsp;&nbsp;2.0什ㄇ都有版</a></td><!--免der忘惹，前面控制高度達到視覺水平，再來是空格符號-->
+				<td style="line-height:40px;"><a href="defaultwork.html">&nbsp;&nbsp;1.0維調</a></td><!--免der忘惹，前面控制高度達到視覺水平，再來是空格符號-->
 			</tr>
 		</table>
 		<div style="text-align:center;" id="showbox"></div>
@@ -69,7 +58,6 @@
 			</table>
 		</div>
 	</div>
-	<div id='thankandloveyoubestpika'>Copyright © 總之不是我，是bestpika。並感謝唯唯(@bestpika)大大幫我做這個網頁，聽他說他是隨便做ㄉ，大佬一隨便起來果然真不隨便。</div>
 	<script>
 	     (() => {
 	       new Vue({
@@ -77,10 +65,15 @@
 	         data: {
 	           options: {
 	             cities: [
-			{ name: '竹縣', code: '0B' },
-	               { name: '新竹', code: '09' },
-	               { name: '竹科', code: '10' },
-	               { name: '苗栗', code: '0A' }
+			     { name: '竹縣', code: '0B' },
+			     { name: '新竹', code: '09' },
+			     { name: '竹科', code: '10' },
+			     { name: '苗栗', code: '0A' },
+			     { name: '新北', code: '05' },     
+			     { name: '臺北', code: '00' },
+			     { name: '臺中', code: '01' },
+			     { name: '高雄', code: '12' },
+			     { name: '嘉義', code: '08' }
 	             ]
 	           },
 	           city: '',
