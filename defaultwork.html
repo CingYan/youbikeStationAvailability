@@ -12,7 +12,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport">
-	<title>場站車輛監控ㄉ網頁</title>
+	<title>上班偷懶用好網頁</title>
 	<style>
 	     html, 
 	     body {
@@ -42,11 +42,9 @@
 	<div id="app">
 		<table align="center">
 			<tr>
-				<td>
-					<div class="select" v-on:change="fetchBikes"><select v-model="city">
-					<option v-bind:value="city.code" v-for="city of options.cities">{{ city.name }}</option></select></div>
-				</td>
-				<td style="line-height:40px;"><a href="allno.html">&nbsp;&nbsp;什ㄇ都有版</a></td><!--免der忘惹，前面控制高度達到視覺水平，再來是空格符號-->
+			<td><div class="select" v-on:change="fetchBikes"><select v-model="city"><option v-bind:value="city.code" v-for="city of options.cities">{{ city.name }}</option></select></div></td>
+			<td style="line-height:40px;"><a href="allno.html">&nbsp;&nbsp;什ㄇ都有版</a></td><!--免der忘惹，前面控制高度達到視覺水平，再來是空格符號-->
+			<td style="line-height:40px;"><a href="2point0.html">&nbsp;&nbsp;2.0維調</a></td><!--免der忘惹，前面控制高度達到視覺水平，再來是空格符號-->				
 			</tr>
 		</table>
 		<div style="text-align:center;" id="showbox"></div>
@@ -69,7 +67,6 @@
 			</table>
 		</div>
 	</div>
-	<div id='thankandloveyoubestpika'>Copyright © 總之不是我，是bestpika。並感謝唯唯(@bestpika)大大幫我做這個網頁，聽他說他是隨便做ㄉ，大佬一隨便起來果然真不隨便。</div>
 	<script>
 	     (() => {
 	       new Vue({
