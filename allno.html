@@ -41,10 +41,9 @@
 	<div id="app">
 		<table align="center">
 			<tr>
-				<td>
-					<div class="select" v-on:change="fetchBikes"><select v-model="city"><option v-bind:value="city.code" v-for="city of options.cities">{{ city.name }}</option></select></div>
-				</td>
-				<td style="line-height:40px;"><a href="./index.html">&nbsp;&nbsp;新竹維調</a></td>
+				<td><div class="select" v-on:change="fetchBikes"><select v-model="city"><option v-bind:value="city.code" v-for="city of options.cities">{{ city.name }}</option></select></div></td>
+				<td style="line-height:40px;"><a href="./defaultwork.html">&nbsp;&nbsp;1.0維調</a></td>
+				<td style="line-height:40px;"><a href="./2point0.html">&nbsp;&nbsp;2.0維調</a></td>
 			</tr>
 		</table>
 		<div style="text-align:center;" id="showbox"></div>
@@ -83,14 +82,13 @@
 	         data: {
 	           options: {
 	             cities: [
-	               { name: '新竹', code: '09' },
-	               { name: '竹科', code: '10' },
-	               { name: '苗栗', code: '0A' },
-	               { name: '彰化', code: '0D' },
-	               { name: '新北', code: '05' },     
-	               { name: '桃園', code: '07' },
-	               { name: '臺北', code: '00' },
-	               { name: '臺中', code: '01' }
+					{ name: '新竹', code: '09' },
+					{ name: '竹科', code: '10' },
+					{ name: '苗栗', code: '0A' },
+					{ name: '新北', code: '05' },     
+					{ name: '桃園', code: '07' },
+					{ name: '臺北', code: '00' },
+					{ name: '臺中', code: '01' }
 	             ]
 	           },
 	           city: '',
