@@ -6,4 +6,4 @@
 	cingyan.github.io/youbikeStationAvailability/
 ## todo
 順應ufuckingbike 1.0 下架，api內容變更，網頁架構與API調用更新
-目前網頁功能無法使用(2023/06/15)
+EFUCKINGBIKE的調用
