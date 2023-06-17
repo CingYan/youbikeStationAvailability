@@ -6,5 +6,4 @@
 	
 [請點這裡](Https://cingyan.github.io/youbikeStationAvailability/)
 ## todo
-順應ufuckingbike 1.0 下架，api內容變更，網頁架構與API調用更新
-EFUCKINGBIKE的調用
+沒有ㄌ
