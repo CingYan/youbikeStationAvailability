@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>YouBike 2.0 場站監控</title>
+  <title>2.0 上班偷懶用好網頁</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -14,7 +14,7 @@
       padding-bottom: 20px;
     }
     .header {
-      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      background: linear-gradient(135deg, #FF9800, #E65100);
       color: white;
       padding: 14px 16px;
       position: sticky;
@@ -146,7 +146,7 @@
       display: inline-block;
       width: 22px; height: 22px;
       border: 3px solid #e0e0e0;
-      border-top-color: #4CAF50;
+      border-top-color: #FF9800;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
@@ -164,12 +164,12 @@
   <div id="app">
     <div class="header">
       <div class="header-top">
-        <h1>🚲 YouBike 2.0</h1>
+        <h1>🚲 2.0 上班用</h1>
         <span class="clock">{{ clock }}</span>
       </div>
       <div class="tab-bar">
-        <span class="active">🗺️ 全部城市</span>
-        <a href="2point0work.html">💼 工作區域</a>
+        <a href="2point0.html">🗺️ 全部城市</a>
+        <span class="active">💼 工作區域</span>
       </div>
       <div class="controls">
         <select class="ctrl-select" v-model="city" @change="onCityChange">
@@ -223,23 +223,12 @@
       el: '#app',
       data: {
         cityList: [
-          { name: '臺北市', code: '00' },
-          { name: '新北市', code: '05' },
-          { name: '臺中市', code: '01' },
-          { name: '高雄市', code: '12' },
-          { name: '桃園市', code: '07' },
-          { name: '台南市', code: '13' },
           { name: '新竹市', code: '09' },
           { name: '新竹縣', code: '0B' },
           { name: '竹科', code: '10' },
-          { name: '苗栗縣', code: '0A' },
-          { name: '嘉義縣', code: '11' },
-          { name: '嘉義市', code: '08' },
-          { name: '屏東縣', code: '14' },
-          { name: '臺東縣', code: '15' },
-          { name: '花蓮(光復)', code: '16' }
+          { name: '苗栗縣', code: '0A' }
         ],
-        city: '00',
+        city: '09',
         district: '',
         search: '',
         allStations: [],
