@@ -9,9 +9,9 @@
 因應 Youbike 1.0 場站即將全面下架，已得知該type API無法提供準確訊息，目前1.0相關頁面僅供展示用(2023/06/17)
 
 ## 2.0
-[2.0工作用網頁](./2point0.html)
+[2.0工作用網頁](./2point0work.html)
 
-[2.0所有資訊網頁](./2point0allno.html)
+[2.0所有資訊網頁](./2point0.html)
 
 * * *
 Copyright © 總之不是我，是bestpika。

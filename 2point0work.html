@@ -141,6 +141,18 @@
     .bb-return { background: #E3F2FD; color: #1565C0; }
     .bb-total { background: #F5F5F5; color: #888; font-size: 12px; }
     .bb-zero { opacity: 0.35; }
+    .map-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .map-link:hover { opacity: 1; }
+    .map-link img { width: 20px; height: 20px; }
     .loading { text-align: center; padding: 50px 20px; color: #999; }
     .spinner {
       display: inline-block;
@@ -196,6 +208,9 @@
         <div>{{ search ? '找不到站點' : '選擇城市' }}</div>
       </div>
       <div v-else v-for="s of filtered" :key="s.station_no" class="station-card">
+        <a class="map-link" :href="'https://www.google.com/maps/search/?api=1&query=' + s.lat + ',' + s.lng" target="_blank" title="Google 地圖">
+          <img src="https://maps.google.com/mapfiles/ms/icons/red-dot.png" alt="地圖">
+        </a>
         <div class="station-info">
           <div class="station-name">{{ s.name_tw }}</div>
           <div class="station-meta">{{ s.district_tw }} · {{ shortTime(s.time) }}</div>
