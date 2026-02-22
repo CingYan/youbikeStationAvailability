@@ -14,9 +14,16 @@
 [2.0所有資訊網頁](./2point0.html)
 
 * * *
-Copyright © 總之不是我，是bestpika。
 
-並感謝唯唯(@bestpika)大大提供了實際網頁的原始架構以及99%的原始碼。
+### 貢獻者
+
+| 貢獻者 | 比例 | 說明 |
+|--------|------|------|
+| [観月唯 (@bestpika)](https://github.com/bestpika) | ~40% | 原始架構設計、核心原始碼、1.0/2.0 基底 |
+| [CingYan](https://github.com/CingYan) | ~30% | 長期維護、API 更新、2point0allno 重構 |
+| [Eagle (拍拍🦅)](https://github.com/CingYan) | ~30% | v3.0.0 全面重寫 2point0 + 2point0work |
+
+感謝唯唯([@bestpika](https://github.com/bestpika))大大提供了實際網頁的原始架構以及核心原始碼。
 
 聽他說他是隨便做ㄉ，大佬一隨便起來果然真不隨便。
 

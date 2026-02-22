@@ -20,6 +20,14 @@ YouBike 各站點營運狀態以及車輛可租還簡易查詢系統
 - ⚡ E-bike 可借數量
 - 📱 手機版最佳化
 
+### 貢獻者
+
+| 貢獻者 | 比例 | 說明 |
+|--------|------|------|
+| [観月唯 (@bestpika)](https://github.com/bestpika) | ~40% | 原始架構設計、核心原始碼、1.0/2.0 基底 |
+| [CingYan](https://github.com/CingYan) | ~30% | 長期維護、API 更新、2point0allno 重構 |
+| [Eagle (拍拍🦅)](https://github.com/CingYan) | ~30% | v3.0.0 全面重寫 2point0 + 2point0work |
+
 ### 版本紀錄
 - **v3.0.0** — API 更新、全面重構、新增分區篩選 + E-bike + Google 地圖 + 手機版 + 工作版
 - **v2.3.4.2** — youbike 更改更新 data
@@ -27,6 +35,3 @@ YouBike 各站點營運狀態以及車輛可租還簡易查詢系統
 - **v2.3.4** — Fix 苗栗無法顯示 Bug
 
 [請點這裡](https://cingyan.github.io/youbikeStationAvailability/)
-
----
-總之 80% 不是我的東西。感謝唯唯(@bestpika) 大大提供了實際網頁的原始架構以及 99% 的原始碼。
