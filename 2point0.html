@@ -105,6 +105,14 @@
       white-space: nowrap;
     }
     .quick-filter input { accent-color: #fff; }
+    .quick-filter-button {
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .quick-filter-button:disabled {
+      opacity: 0.65;
+      cursor: default;
+    }
     .stats-bar {
       display: flex;
       gap: 6px;
@@ -224,20 +232,21 @@
         <span class="clock">{{ clock }}</span>
       </div>
       <div class="tab-bar">
-        <span class="active">🗺️ 全部城市</span>
-        <a href="2point0work.html">💼 工作區域</a>
+        <span :class="{active: scopeMode === 'all'}" @click="setScope('all')">🗺️ 全部城市</span>
+        <span :class="{active: scopeMode === 'work'}" @click="setScope('work')">💼 工作區域</span>
       </div>
       <div class="controls">
         <select class="ctrl-select" v-model="city" @change="onCityChange">
-          <option v-for="c of cityList" :value="c.code">{{ c.name }}</option>
+          <option v-for="c of activeCityList" :value="c.code">{{ c.name }}</option>
         </select>
-        <select class="ctrl-select" v-model="district" @change="applyFilter" v-if="districtList.length > 1">
+        <select class="ctrl-select" v-model="districtKey" @change="applyFilter" v-if="districtList.length > 1">
           <option value="">全部分區</option>
-          <option v-for="d of districtList" :value="d">{{ d }}</option>
+          <option v-for="d of districtList" :value="d.key">{{ d.label }}</option>
         </select>
         <input class="search-box" v-model="search" placeholder="🔍 搜尋..." @input="applyFilter">
         <select class="ctrl-select sort-select" v-model="sortMode" @change="applyFilter">
           <option value="name">站名排序</option>
+          <option value="distance">離我最近</option>
           <option value="rentDesc">可借最多</option>
           <option value="returnDesc">可還最多</option>
           <option value="ebikeDesc">E-bike 最多</option>
@@ -246,6 +255,9 @@
           <label class="quick-filter"><input type="checkbox" v-model="onlyRent" @change="applyFilter">可借&gt;0</label>
           <label class="quick-filter"><input type="checkbox" v-model="onlyReturn" @change="applyFilter">可還&gt;0</label>
           <label class="quick-filter"><input type="checkbox" v-model="onlyEbike" @change="applyFilter">E-bike&gt;0</label>
+          <button class="quick-filter quick-filter-button" @click="getLocation" :disabled="locating">
+            {{ locating ? '定位中...' : (userLocation ? '更新定位' : '定位排序') }}
+          </button>
         </div>
       </div>
     </div>
@@ -254,9 +266,11 @@
       <span class="stat-item"><span class="stat-dot dot-green"></span> 可借 {{ totalRent }}</span>
       <span class="stat-item"><span class="stat-dot dot-blue"></span> 可還 {{ totalReturn }}</span>
       <span class="stat-item">📍 {{ filtered.length }} 站</span>
+      <span class="stat-item" v-if="userLocation">📡 已定位</span>
       <span class="stat-item" style="margin-left:auto;">{{ updateStatusText }}</span>
     </div>
     <div class="error-bar" v-if="errorMessage">{{ errorMessage }}</div>
+    <div class="error-bar" v-if="locationError">{{ locationError }}</div>
     <div class="station-list">
       <div v-if="loading" class="loading"><div class="spinner"></div><br>載入中...</div>
       <div v-else-if="!filtered.length" class="empty-state">
@@ -269,7 +283,7 @@
         </a>
         <div class="station-info">
           <div class="station-name">{{ text(s.name_tw, '未命名站點') }}</div>
-          <div class="station-meta">{{ text(s.district_tw, '未知分區') }} · {{ shortTime(s.time) }}</div>
+          <div class="station-meta">{{ stationMeta(s) }}</div>
         </div>
         <div class="bike-nums">
           <div class="bb bb-ebike" :class="{'bb-zero': !ebikeCount(s)}">
@@ -293,7 +307,7 @@
     new Vue({
       el: '#app',
       data: {
-        cityList: [
+        allCityList: [
           { name: '臺北市', code: '00' },
           { name: '新北市', code: '05' },
           { name: '臺中市', code: '01' },
@@ -310,8 +324,10 @@
           { name: '臺東縣', code: '15' },
           { name: '花蓮(光復)', code: '16' }
         ],
-        city: '00',
-        district: '',
+        workCityCodes: ['09', '0B', '10', '0A'],
+        scopeMode: 'all',
+        city: '',
+        districtKey: '',
         search: '',
         sortMode: 'name',
         onlyRent: false,
@@ -323,14 +339,23 @@
         loading: true,
         clock: '',
         errorMessage: '',
+        locationError: '',
         isRefreshing: false,
-        lastUpdatedAt: null
+        lastUpdatedAt: null,
+        userLocation: null,
+        locating: false
       },
       computed: {
+        activeCityList() {
+          const source = this.scopeMode === 'work'
+            ? this.allCityList.filter(c => this.workCityCodes.includes(c.code))
+            : this.allCityList
+          return [{ name: this.scopeMode === 'work' ? '工作區域全部' : '全部城市', code: '' }].concat(source)
+        },
         totalEbike() { return this.filtered.reduce((sum, station) => sum + this.ebikeCount(station), 0) },
         totalRent() { return this.filtered.reduce((sum, station) => sum + this.num(station.available_spaces), 0) },
         totalReturn() { return this.filtered.reduce((sum, station) => sum + this.num(station.empty_spaces), 0) },
-        hasActiveFilter() { return !!(this.search || this.district || this.onlyRent || this.onlyReturn || this.onlyEbike) },
+        hasActiveFilter() { return !!(this.search || this.city || this.districtKey || this.onlyRent || this.onlyReturn || this.onlyEbike) },
         latestDataTime() {
           const latest = this.filtered.map(s => this.text(s.time)).filter(Boolean).sort().pop()
           return latest ? this.shortTime(latest) : ''
@@ -364,30 +389,48 @@
             this.isRefreshing = false
           }
         },
+        setScope(mode) {
+          if (this.scopeMode === mode) return
+          this.scopeMode = mode
+          this.city = ''
+          this.districtKey = ''
+          this.buildDistricts()
+          this.applyFilter()
+        },
         onCityChange() {
-          this.district = ''
+          this.districtKey = ''
           this.buildDistricts()
           this.applyFilter()
         },
         buildDistricts() {
-          const set = new Set()
+          const map = new Map()
           for (const s of this.allStations) {
-            if (s.area_code === this.city && s.district_tw) set.add(s.district_tw)
+            if (!this.stationInScope(s)) continue
+            if (this.city && s.area_code !== this.city) continue
+            if (!s.district_tw) continue
+            const key = s.area_code + '|' + s.district_tw
+            const cityName = this.cityName(s.area_code)
+            const label = this.city ? s.district_tw : cityName + ' / ' + s.district_tw
+            map.set(key, label)
           }
-          this.districtList = Array.from(set).sort()
+          this.districtList = Array.from(map, ([key, label]) => ({ key, label }))
+            .sort((a, b) => a.label.localeCompare(b.label, 'zh-Hant'))
         },
         applyFilter() {
-          const c = this.city, d = this.district, q = this.search.trim().toLowerCase()
+          const c = this.city, d = this.parseDistrictKey(this.districtKey), q = this.search.trim().toLowerCase()
           const filtered = this.allStations.filter(s => {
-            if (s.area_code !== c) return false
-            if (d && s.district_tw !== d) return false
+            if (!this.stationInScope(s)) return false
+            if (c && s.area_code !== c) return false
+            if (d && (s.area_code !== d.city || s.district_tw !== d.district)) return false
             if (this.onlyRent && !this.num(s.available_spaces)) return false
             if (this.onlyReturn && !this.num(s.empty_spaces)) return false
             if (this.onlyEbike && !this.ebikeCount(s)) return false
             if (q && !this.matchesSearch(s, q)) return false
             return true
           })
+          if (this.sortMode === 'distance' && !this.userLocation) this.getLocation()
           const sorters = {
+            distance: (a, b) => this.distanceToStation(a) - this.distanceToStation(b),
             rentDesc: (a, b) => this.num(b.available_spaces) - this.num(a.available_spaces),
             returnDesc: (a, b) => this.num(b.empty_spaces) - this.num(a.empty_spaces),
             ebikeDesc: (a, b) => this.ebikeCount(b) - this.ebikeCount(a),
@@ -395,8 +438,76 @@
           }
           this.filtered = filtered.sort(sorters[this.sortMode] || sorters.name)
         },
+        stationInScope(s) {
+          return this.scopeMode !== 'work' || this.workCityCodes.includes(this.text(s.area_code))
+        },
+        parseDistrictKey(key) {
+          if (!key) return null
+          const parts = key.split('|')
+          return parts.length === 2 ? { city: parts[0], district: parts[1] } : null
+        },
+        cityName(code) {
+          const city = this.allCityList.find(c => c.code === code)
+          return city ? city.name : this.text(code, '未知城市')
+        },
         matchesSearch(s, q) {
-          return [s.name_tw, s.address_tw, s.station_no].some(v => this.text(v).toLowerCase().includes(q))
+          return [s.name_tw, s.address_tw, s.station_no, this.cityName(s.area_code), s.district_tw].some(v => this.text(v).toLowerCase().includes(q))
+        },
+        async getLocation() {
+          if (this.locating) return
+          if (!navigator.geolocation) {
+            this.locationError = '這個瀏覽器不支援定位'
+            return
+          }
+          this.locating = true
+          this.locationError = ''
+          navigator.geolocation.getCurrentPosition(
+            pos => {
+              this.userLocation = {
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude
+              }
+              this.locating = false
+              this.sortMode = 'distance'
+              this.applyFilter()
+            },
+            err => {
+              this.locating = false
+              this.locationError = err && err.message ? '定位失敗：' + err.message : '定位失敗'
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+          )
+        },
+        stationMeta(s) {
+          const parts = []
+          if (!this.city) parts.push(this.cityName(s.area_code))
+          parts.push(this.text(s.district_tw, '未知分區'))
+          if (this.userLocation) parts.push(this.formatDistance(this.distanceToStation(s)))
+          parts.push(this.shortTime(s.time))
+          return parts.filter(Boolean).join(' · ')
+        },
+        distanceToStation(s) {
+          if (!this.userLocation) return Number.MAX_SAFE_INTEGER
+          const lat = this.coord(s.lat)
+          const lng = this.coord(s.lng)
+          if (lat === null || lng === null) return Number.MAX_SAFE_INTEGER
+          return this.haversine(this.userLocation.lat, this.userLocation.lng, lat, lng)
+        },
+        coord(v) {
+          const n = Number(v)
+          return Number.isFinite(n) ? n : null
+        },
+        haversine(lat1, lng1, lat2, lng2) {
+          const rad = Math.PI / 180
+          const dLat = (lat2 - lat1) * rad
+          const dLng = (lng2 - lng1) * rad
+          const a = Math.sin(dLat / 2) ** 2
+            + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLng / 2) ** 2
+          return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+        },
+        formatDistance(m) {
+          if (!Number.isFinite(m) || m === Number.MAX_SAFE_INTEGER) return ''
+          return m < 1000 ? Math.round(m) + 'm' : (m / 1000).toFixed(m < 10000 ? 1 : 0) + 'km'
         },
         ebikeCount(s) {
           return this.num(s && s.available_spaces_detail ? s.available_spaces_detail.eyb : 0)
