@@ -26,10 +26,10 @@ YouBike 各站點營運狀態以及車輛可租還簡易查詢系統
 |--------|------|------|
 | [観月唯 (@bestpika)](https://github.com/bestpika) | ~40% | 原始架構設計、核心原始碼、1.0/2.0 基底 |
 | [CingYan](https://github.com/CingYan) | ~30% | 長期維護、API 更新、2point0allno 重構 |
-| [Eagle (拍拍🦅)](https://github.com/CingYan) | ~30% | v3.0.0 全面重寫 2point0 + 2point0work |
+| [Eagle (拍拍🦅)](https://github.com/CingYan) | ~30% | v3.0.0 介面整合、2point0allno 重構、Google 地圖入口補強、文件更新 |
 
 ### 版本紀錄
-- **v3.0.0** — API 更新、全面重構、新增分區篩選 + E-bike + Google 地圖 + 手機版 + 工作版
+- **v3.0.0** — 統一 2point0allno 到新版卡片式 UI，補強 Google 地圖入口、站點 ID、營運狀態與文件
 - **v2.3.4.2** — youbike 更改更新 data
 - **v2.3.4.1** — 更改更新時間間隔
 - **v2.3.4** — Fix 苗栗無法顯示 Bug

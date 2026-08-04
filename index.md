@@ -13,6 +13,8 @@
 
 [2.0所有資訊網頁](./2point0.html)
 
+[2.0什ㄇ都有版](./2point0allno.html)
+
 * * *
 
 ### 貢獻者
@@ -21,7 +23,7 @@
 |--------|------|------|
 | [観月唯 (@bestpika)](https://github.com/bestpika) | ~40% | 原始架構設計、核心原始碼、1.0/2.0 基底 |
 | [CingYan](https://github.com/CingYan) | ~30% | 長期維護、API 更新、2point0allno 重構 |
-| [Eagle (拍拍🦅)](https://github.com/CingYan) | ~30% | v3.0.0 全面重寫 2point0 + 2point0work |
+| [Eagle (拍拍🦅)](https://github.com/CingYan) | ~30% | v3.0.0 介面整合、2point0allno 重構、Google 地圖入口補強、文件更新 |
 
 感謝唯唯([@bestpika](https://github.com/bestpika))大大提供了實際網頁的原始架構以及核心原始碼。
 

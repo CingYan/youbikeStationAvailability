@@ -84,6 +84,27 @@
       min-width: 100px;
     }
     .search-box::placeholder { color: rgba(255,255,255,0.6); }
+    .sort-select { min-width: 112px; }
+    .quick-filters {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 1px;
+    }
+    .quick-filter {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: white;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .quick-filter input { accent-color: #fff; }
     .stats-bar {
       display: flex;
       gap: 6px;
@@ -93,6 +114,13 @@
       font-size: 11px;
       color: #666;
       overflow-x: auto;
+    }
+    .error-bar {
+      padding: 8px 16px;
+      background: #FFF3E0;
+      color: #A84300;
+      border-bottom: 1px solid #FFE0B2;
+      font-size: 12px;
     }
     .stat-item { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
     .stat-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
@@ -119,27 +147,27 @@
       text-overflow: ellipsis;
     }
     .station-meta { font-size: 10px; color: #999; margin-top: 2px; }
-    .bike-nums { display: flex; gap: 4px; flex-shrink: 0; }
+    .bike-nums { display: flex; gap: 5px; flex-shrink: 0; }
     .bb {
       text-align: center;
-      min-width: 34px;
-      padding: 3px 4px;
+      min-width: 38px;
+      padding: 4px 5px;
       border-radius: 6px;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 700;
       line-height: 1.2;
     }
     .bb small {
       display: block;
-      font-size: 8px;
-      font-weight: 400;
-      opacity: 0.7;
+      font-size: 10px;
+      font-weight: 600;
+      opacity: 0.75;
       margin-top: 1px;
     }
     .bb-ebike { background: #FFF3E0; color: #E65100; }
     .bb-rent { background: #E8F5E9; color: #2E7D32; }
     .bb-return { background: #E3F2FD; color: #1565C0; }
-    .bb-total { background: #F5F5F5; color: #888; font-size: 12px; }
+    .bb-total { background: #F5F5F5; color: #888; font-size: 14px; }
     .bb-zero { opacity: 0.35; }
     .map-link {
       display: flex;
@@ -168,7 +196,23 @@
     @media (max-width: 380px) {
       .station-name { font-size: 12px; }
       .bb { min-width: 30px; font-size: 14px; }
+      .bb small { font-size: 9px; }
       .bb-total { display: none; }
+      .station-card { align-items: flex-start; }
+      .bike-nums { flex-wrap: wrap; justify-content: flex-end; max-width: 112px; }
+    }
+    @media (min-width: 900px) {
+      .station-card { padding: 11px 14px; gap: 10px; }
+      .station-name { font-size: 15px; }
+      .station-meta { font-size: 12px; }
+      .bike-nums { gap: 7px; }
+      .bb {
+        min-width: 48px;
+        padding: 5px 7px;
+        font-size: 21px;
+      }
+      .bb small { font-size: 12px; }
+      .bb-total { font-size: 17px; }
     }
   </style>
 </head>
@@ -192,6 +236,17 @@
           <option v-for="d of districtList" :value="d">{{ d }}</option>
         </select>
         <input class="search-box" v-model="search" placeholder="🔍 搜尋..." @input="applyFilter">
+        <select class="ctrl-select sort-select" v-model="sortMode" @change="applyFilter">
+          <option value="name">站名排序</option>
+          <option value="rentDesc">可借最多</option>
+          <option value="returnDesc">可還最多</option>
+          <option value="ebikeDesc">E-bike 最多</option>
+        </select>
+        <div class="quick-filters">
+          <label class="quick-filter"><input type="checkbox" v-model="onlyRent" @change="applyFilter">可借&gt;0</label>
+          <label class="quick-filter"><input type="checkbox" v-model="onlyReturn" @change="applyFilter">可還&gt;0</label>
+          <label class="quick-filter"><input type="checkbox" v-model="onlyEbike" @change="applyFilter">E-bike&gt;0</label>
+        </div>
       </div>
     </div>
     <div class="stats-bar" v-if="filtered.length">
@@ -199,34 +254,35 @@
       <span class="stat-item"><span class="stat-dot dot-green"></span> 可借 {{ totalRent }}</span>
       <span class="stat-item"><span class="stat-dot dot-blue"></span> 可還 {{ totalReturn }}</span>
       <span class="stat-item">📍 {{ filtered.length }} 站</span>
-      <span class="stat-item" style="margin-left:auto;">5s</span>
+      <span class="stat-item" style="margin-left:auto;">{{ updateStatusText }}</span>
     </div>
+    <div class="error-bar" v-if="errorMessage">{{ errorMessage }}</div>
     <div class="station-list">
       <div v-if="loading" class="loading"><div class="spinner"></div><br>載入中...</div>
       <div v-else-if="!filtered.length" class="empty-state">
         <div class="emoji">🚲</div>
-        <div>{{ search ? '找不到站點' : '選擇城市' }}</div>
+        <div>{{ hasActiveFilter ? '找不到站點' : '選擇城市' }}</div>
       </div>
       <div v-else v-for="s of filtered" :key="s.station_no" class="station-card">
-        <a class="map-link" :href="'https://www.google.com/maps/search/?api=1&query=' + s.lat + ',' + s.lng" target="_blank" title="Google 地圖">
+        <a class="map-link" :href="'https://www.google.com/maps/search/?api=1&query=' + s.lat + ',' + s.lng" target="_blank" rel="noopener noreferrer" title="Google 地圖">
           <img src="https://maps.google.com/mapfiles/ms/icons/red-dot.png" alt="地圖">
         </a>
         <div class="station-info">
-          <div class="station-name">{{ s.name_tw }}</div>
-          <div class="station-meta">{{ s.district_tw }} · {{ shortTime(s.time) }}</div>
+          <div class="station-name">{{ text(s.name_tw, '未命名站點') }}</div>
+          <div class="station-meta">{{ text(s.district_tw, '未知分區') }} · {{ shortTime(s.time) }}</div>
         </div>
         <div class="bike-nums">
-          <div class="bb bb-ebike" :class="{'bb-zero': !s.available_spaces_detail.eyb}">
-            {{ s.available_spaces_detail.eyb }}<small>E借</small>
+          <div class="bb bb-ebike" :class="{'bb-zero': !ebikeCount(s)}">
+            {{ ebikeCount(s) }}<small>E借</small>
           </div>
-          <div class="bb bb-rent" :class="{'bb-zero': !s.available_spaces}">
-            {{ s.available_spaces }}<small>可借</small>
+          <div class="bb bb-rent" :class="{'bb-zero': !num(s.available_spaces)}">
+            {{ num(s.available_spaces) }}<small>可借</small>
           </div>
-          <div class="bb bb-return" :class="{'bb-zero': !s.empty_spaces}">
-            {{ s.empty_spaces }}<small>可還</small>
+          <div class="bb bb-return" :class="{'bb-zero': !num(s.empty_spaces)}">
+            {{ num(s.empty_spaces) }}<small>可還</small>
           </div>
           <div class="bb bb-total">
-            {{ s.parking_spaces }}<small>總數</small>
+            {{ num(s.parking_spaces) }}<small>總數</small>
           </div>
         </div>
       </div>
@@ -246,26 +302,56 @@
         city: '09',
         district: '',
         search: '',
+        sortMode: 'name',
+        onlyRent: false,
+        onlyReturn: false,
+        onlyEbike: false,
         allStations: [],
         filtered: [],
         districtList: [],
         loading: true,
-        clock: ''
+        clock: '',
+        errorMessage: '',
+        isRefreshing: false,
+        lastUpdatedAt: null
       },
       computed: {
-        totalEbike() { return this.filtered.reduce((s, x) => s + (x.available_spaces_detail ? x.available_spaces_detail.eyb || 0 : 0), 0) },
-        totalRent() { return this.filtered.reduce((s, x) => s + (x.available_spaces || 0), 0) },
-        totalReturn() { return this.filtered.reduce((s, x) => s + (x.empty_spaces || 0), 0) }
+        totalEbike() { return this.filtered.reduce((sum, station) => sum + this.ebikeCount(station), 0) },
+        totalRent() { return this.filtered.reduce((sum, station) => sum + this.num(station.available_spaces), 0) },
+        totalReturn() { return this.filtered.reduce((sum, station) => sum + this.num(station.empty_spaces), 0) },
+        hasActiveFilter() { return !!(this.search || this.district || this.onlyRent || this.onlyReturn || this.onlyEbike) },
+        latestDataTime() {
+          const latest = this.filtered.map(s => this.text(s.time)).filter(Boolean).sort().pop()
+          return latest ? this.shortTime(latest) : ''
+        },
+        updateStatusText() {
+          if (this.isRefreshing) return '更新中...'
+          if (!this.lastUpdatedAt) return '尚未更新'
+          return (this.latestDataTime ? '資料 ' + this.latestDataTime + ' · ' : '') + '更新 ' + this.formatClock(this.lastUpdatedAt)
+        }
       },
       methods: {
         async fetchData() {
+          if (this.isRefreshing) return
+          this.isRefreshing = true
           try {
             const res = await fetch('https://apis.youbike.com.tw/json/station-yb2.json')
+            if (!res.ok) throw new Error('API HTTP ' + res.status)
             const buf = await res.arrayBuffer()
-            this.allStations = JSON.parse(new TextDecoder('utf-8').decode(buf))
+            const stations = JSON.parse(new TextDecoder('utf-8').decode(buf))
+            if (!Array.isArray(stations)) throw new Error('API 格式不是陣列')
+            this.allStations = stations
+            this.lastUpdatedAt = new Date()
+            this.errorMessage = ''
+            this.buildDistricts()
             this.applyFilter()
-          } catch (e) { console.error('Fetch error:', e) }
-          this.loading = false
+          } catch (e) {
+            console.error('Fetch error:', e)
+            this.errorMessage = '更新失敗，保留上次資料'
+          } finally {
+            this.loading = false
+            this.isRefreshing = false
+          }
         },
         onCityChange() {
           this.district = ''
@@ -281,23 +367,48 @@
         },
         applyFilter() {
           const c = this.city, d = this.district, q = this.search.trim().toLowerCase()
-          this.filtered = this.allStations.filter(s => {
+          const filtered = this.allStations.filter(s => {
             if (s.area_code !== c) return false
             if (d && s.district_tw !== d) return false
-            if (q && !s.name_tw.toLowerCase().includes(q) && !s.address_tw.toLowerCase().includes(q)) return false
+            if (this.onlyRent && !this.num(s.available_spaces)) return false
+            if (this.onlyReturn && !this.num(s.empty_spaces)) return false
+            if (this.onlyEbike && !this.ebikeCount(s)) return false
+            if (q && !this.matchesSearch(s, q)) return false
             return true
           })
+          const sorters = {
+            rentDesc: (a, b) => this.num(b.available_spaces) - this.num(a.available_spaces),
+            returnDesc: (a, b) => this.num(b.empty_spaces) - this.num(a.empty_spaces),
+            ebikeDesc: (a, b) => this.ebikeCount(b) - this.ebikeCount(a),
+            name: (a, b) => this.text(a.name_tw).localeCompare(this.text(b.name_tw), 'zh-Hant')
+          }
+          this.filtered = filtered.sort(sorters[this.sortMode] || sorters.name)
+        },
+        matchesSearch(s, q) {
+          return [s.name_tw, s.address_tw, s.station_no].some(v => this.text(v).toLowerCase().includes(q))
+        },
+        ebikeCount(s) {
+          return this.num(s && s.available_spaces_detail ? s.available_spaces_detail.eyb : 0)
+        },
+        num(v) {
+          const n = Number(v)
+          return Number.isFinite(n) ? n : 0
+        },
+        text(v, fallback = '') {
+          return v === null || v === undefined ? fallback : String(v)
         },
         shortTime(t) { return t ? t.slice(11, 16) : '' },
+        formatClock(d) {
+          return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0')
+        },
         updateClock() {
-          const n = new Date()
-          this.clock = n.getHours() + ':' + String(n.getMinutes()).padStart(2, '0') + ':' + String(n.getSeconds()).padStart(2, '0')
+          this.clock = this.formatClock(new Date())
         }
       },
       mounted() {
         this.updateClock()
         setInterval(this.updateClock, 1000)
-        this.fetchData().then(() => this.buildDistricts())
+        this.fetchData()
         setInterval(this.fetchData, 5000)
       }
     })
