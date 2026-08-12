@@ -1,4 +1,4 @@
-## youbikeStationAvailability v3.0.0
+## youbikeStationAvailability v3.1.0
 
 YouBike 各站點營運狀態以及車輛可租還簡易查詢系統
 
