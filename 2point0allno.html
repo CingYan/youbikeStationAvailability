@@ -8,17 +8,105 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>場站車輛監控ㄉ網頁 - 什ㄇ都有版</title>
+  <script>
+    // 在畫面繪製前就決定佈景，否則深色模式下會先閃一下白底
+    (function () {
+      var mode = 'auto';
+      try { mode = localStorage.getItem('yb-theme') || 'auto'; } catch (e) {}
+      window.__applyTheme = function (m) {
+        var dark = m === 'dark' ||
+          (m === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var el = document.documentElement;
+        el.setAttribute('data-theme', dark ? 'dark' : 'light');
+        el.setAttribute('data-theme-mode', m);
+      };
+      window.__toggleTheme = function () {
+        var order = ['auto', 'light', 'dark'];
+        var cur = document.documentElement.getAttribute('data-theme-mode') || 'auto';
+        var next = order[(order.indexOf(cur) + 1) % order.length];
+        try { localStorage.setItem('yb-theme', next); } catch (e) {}
+        window.__applyTheme(next);
+      };
+      window.__applyTheme(mode);
+      // 跟隨系統時，使用者中途切換系統佈景也要跟著變
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+        if (document.documentElement.getAttribute('data-theme-mode') === 'auto') {
+          window.__applyTheme('auto');
+        }
+      });
+    })();
+  </script>
   <style>
+
+    /* ── 佈景色票 ──
+       深色值是為了凌晨看而調的：底不用純黑（純黑配白字反而更刺眼），
+       數字色塊降飽和度、留得出對比但不會發亮。 */
+    :root {
+      color-scheme: light;
+      --bg: #f0f2f5;
+      --fg: #333;
+      --surface: #fff;
+      --line: #e0e0e0;
+      --muted: #999;
+      --muted-strong: #666;
+      --faint: #bbb;
+      --shadow: rgba(0,0,0,0.06);
+      --brand-1: #7B1FA2;
+      --brand-2: #4A148C;
+      --warn-bg: #FFF3E0;
+      --warn-fg: #A84300;
+      --warn-line: #FFE0B2;
+      --ebike-bg: #FFF3E0; --ebike-fg: #E65100;
+      --rent-bg: #E8F5E9;  --rent-fg: #2E7D32;
+      --return-bg: #E3F2FD; --return-fg: #1565C0;
+      --total-bg: #F5F5F5;  --total-fg: #888;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #12141a;
+      --fg: #e3e6ea;
+      --surface: #1b1f27;
+      --line: #2a2f39;
+      --muted: #8b93a1;
+      --muted-strong: #9aa2b0;
+      --faint: #6b7280;
+      --shadow: rgba(0,0,0,0.5);
+      --brand-1: #3d1a50;
+      --brand-2: #2a0f38;
+      --warn-bg: #3a2a12;
+      --warn-fg: #ffbe7a;
+      --warn-line: #4d3a1c;
+      --ebike-bg: #3a2a12; --ebike-fg: #ffb26b;
+      --rent-bg: #16301c;  --rent-fg: #7fd995;
+      --return-bg: #13283e; --return-fg: #7fb9f2;
+      --total-bg: #232833;  --total-fg: #8b93a1;
+    }
+    .theme-toggle {
+      border: 1px solid rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.15);
+      border-radius: 999px;
+      width: 30px;
+      height: 30px;
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+      margin-left: auto;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    .theme-toggle::after { content: "\1F317"; }
+    :root[data-theme-mode="light"] .theme-toggle::after { content: "\2600\FE0F"; }
+    :root[data-theme-mode="dark"] .theme-toggle::after { content: "\1F319"; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: #f0f2f5;
-      color: #333;
+      background: var(--bg);
+      color: var(--fg);
       min-height: 100vh;
       padding-bottom: 20px;
     }
     .header {
-      background: linear-gradient(135deg, #7B1FA2, #4A148C);
+      background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
       color: white;
       padding: 14px 16px;
       position: sticky;
@@ -73,7 +161,7 @@
       background-position: right 8px center;
       flex-shrink: 0;
     }
-    .ctrl-select option { color: #333; background: white; }
+    .ctrl-select option { color: var(--fg); background: var(--surface); }
     .search-box {
       background: rgba(255,255,255,0.2);
       border: 1px solid rgba(255,255,255,0.4);
@@ -110,17 +198,17 @@
       display: flex;
       gap: 6px;
       padding: 8px 16px;
-      background: white;
-      border-bottom: 1px solid #e0e0e0;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
       font-size: 11px;
-      color: #666;
+      color: var(--muted-strong);
       overflow-x: auto;
     }
     .error-bar {
       padding: 8px 16px;
-      background: #FFF3E0;
-      color: #A84300;
-      border-bottom: 1px solid #FFE0B2;
+      background: var(--warn-bg);
+      color: var(--warn-fg);
+      border-bottom: 1px solid var(--warn-line);
       font-size: 12px;
     }
     .stat-item { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
@@ -130,11 +218,11 @@
     .dot-orange { background: #FF9800; }
     .station-list { padding: 6px 8px; }
     .station-card {
-      background: white;
+      background: var(--surface);
       border-radius: 10px;
       padding: 10px 12px;
       margin-bottom: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px var(--shadow);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -147,8 +235,8 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .station-meta { font-size: 10px; color: #999; margin-top: 2px; }
-    .station-id { font-size: 10px; color: #bbb; }
+    .station-meta { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .station-id { font-size: 10px; color: var(--faint); }
     .map-link {
       display: flex;
       align-items: center;
@@ -178,27 +266,27 @@
       opacity: 0.75;
       margin-top: 1px;
     }
-    .bb-ebike { background: #FFF3E0; color: #E65100; }
-    .bb-rent { background: #E8F5E9; color: #2E7D32; }
-    .bb-return { background: #E3F2FD; color: #1565C0; }
-    .bb-total { background: #F5F5F5; color: #888; font-size: 14px; }
+    .bb-ebike { background: var(--ebike-bg); color: var(--ebike-fg); }
+    .bb-rent { background: var(--rent-bg); color: var(--rent-fg); }
+    .bb-return { background: var(--return-bg); color: var(--return-fg); }
+    .bb-total { background: var(--total-bg); color: var(--total-fg); font-size: 14px; }
     .bb-zero { opacity: 0.35; }
     .status-dot {
       width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
     }
     .status-on { background: #4CAF50; }
     .status-off { background: #f44336; }
-    .loading { text-align: center; padding: 50px 20px; color: #999; }
+    .loading { text-align: center; padding: 50px 20px; color: var(--muted); }
     .spinner {
       display: inline-block;
       width: 22px; height: 22px;
-      border: 3px solid #e0e0e0;
-      border-top-color: #7B1FA2;
+      border: 3px solid var(--line);
+      border-top-color: var(--brand-1);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .empty-state { text-align: center; padding: 60px 20px; color: #aaa; }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
     .empty-state .emoji { font-size: 42px; margin-bottom: 10px; }
     @media (max-width: 380px) {
       .station-name { font-size: 12px; }
@@ -230,6 +318,7 @@
     <div class="header">
       <div class="header-top">
         <h1>🚲 2.0 什ㄇ都有版</h1>
+        <button class="theme-toggle" type="button" onclick="__toggleTheme()" title="切換佈景：跟隨系統 / 淺色 / 深色" aria-label="切換佈景"></button>
         <span class="clock">{{ clock }}</span>
       </div>
       <div class="tab-bar">
