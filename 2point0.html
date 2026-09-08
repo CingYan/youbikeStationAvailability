@@ -393,6 +393,13 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14"></script>
   <script>
+    const stationSorters = {
+      distance: (vm, a, b) => vm.distanceToStation(a) - vm.distanceToStation(b),
+      rentDesc: (vm, a, b) => vm.num(b.available_spaces) - vm.num(a.available_spaces),
+      returnDesc: (vm, a, b) => vm.num(b.empty_spaces) - vm.num(a.empty_spaces),
+      ebikeDesc: (vm, a, b) => vm.ebikeCount(b) - vm.ebikeCount(a),
+      name: (vm, a, b) => vm.text(a.name_tw).localeCompare(vm.text(b.name_tw), 'zh-Hant')
+    }
     new Vue({
       el: '#app',
       data: {
@@ -432,7 +439,8 @@
         isRefreshing: false,
         lastUpdatedAt: null,
         userLocation: null,
-        locating: false
+        locating: false,
+        distanceCache: new WeakMap()
       },
       computed: {
         activeCityList() {
@@ -446,7 +454,10 @@
         totalReturn() { return this.filtered.reduce((sum, station) => sum + this.num(station.empty_spaces), 0) },
         hasActiveFilter() { return !!(this.search || this.city || this.districtKey || this.onlyRent || this.onlyReturn || this.onlyEbike) },
         latestDataTime() {
-          const latest = this.filtered.map(s => this.text(s.time)).filter(Boolean).sort().pop()
+          const latest = this.filtered.reduce((max, s) => {
+            const value = this.text(s.time)
+            return value > max ? value : max
+          }, '')
           return latest ? this.shortTime(latest) : ''
         },
         updateStatusText() {
@@ -466,6 +477,7 @@
             const stations = JSON.parse(new TextDecoder('utf-8').decode(buf))
             if (!Array.isArray(stations)) throw new Error('API 格式不是陣列')
             this.allStations = stations
+            this.distanceCache = new WeakMap()
             this.lastUpdatedAt = new Date()
             this.errorMessage = ''
             this.buildDistricts()
@@ -518,14 +530,8 @@
             return true
           })
           if (this.sortMode === 'distance' && !this.userLocation) this.getLocation()
-          const sorters = {
-            distance: (a, b) => this.distanceToStation(a) - this.distanceToStation(b),
-            rentDesc: (a, b) => this.num(b.available_spaces) - this.num(a.available_spaces),
-            returnDesc: (a, b) => this.num(b.empty_spaces) - this.num(a.empty_spaces),
-            ebikeDesc: (a, b) => this.ebikeCount(b) - this.ebikeCount(a),
-            name: (a, b) => this.text(a.name_tw).localeCompare(this.text(b.name_tw), 'zh-Hant')
-          }
-          this.filtered = filtered.sort(sorters[this.sortMode] || sorters.name)
+          const sorter = stationSorters[this.sortMode] || stationSorters.name
+          this.filtered = filtered.sort((a, b) => sorter(this, a, b))
         },
         stationInScope(s) {
           return this.scopeMode !== 'work' || this.workCityCodes.includes(this.text(s.area_code))
@@ -556,6 +562,7 @@
                 lat: pos.coords.latitude,
                 lng: pos.coords.longitude
               }
+              this.distanceCache = new WeakMap()
               this.locating = false
               this.sortMode = 'distance'
               this.applyFilter()
@@ -577,10 +584,14 @@
         },
         distanceToStation(s) {
           if (!this.userLocation) return Number.MAX_SAFE_INTEGER
+          const cached = this.distanceCache.get(s)
+          if (cached && cached.location === this.userLocation) return cached.distance
           const lat = this.coord(s.lat)
           const lng = this.coord(s.lng)
           if (lat === null || lng === null) return Number.MAX_SAFE_INTEGER
-          return this.haversine(this.userLocation.lat, this.userLocation.lng, lat, lng)
+          const distance = this.haversine(this.userLocation.lat, this.userLocation.lng, lat, lng)
+          this.distanceCache.set(s, { location: this.userLocation, distance })
+          return distance
         },
         coord(v) {
           const n = Number(v)
